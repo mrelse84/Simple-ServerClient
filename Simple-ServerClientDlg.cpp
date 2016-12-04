@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CSimpleServerClientDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON1, &CSimpleServerClientDlg::OnBnClickedButton1)
 	ON_BN_CLICKED(IDC_BUTTON2, &CSimpleServerClientDlg::OnBnClickedButton2)
+	ON_BN_CLICKED(IDOK, &CSimpleServerClientDlg::OnBnClickedOk)
 END_MESSAGE_MAP()
 
 
@@ -212,7 +213,20 @@ void CSimpleServerClientDlg::OnBnClickedButton2()
 	int dataLen = m_strSendData.GetLength();
 	char * pBuf = (LPSTR)(LPCTSTR)m_strSendData;
 
-	Send(pBuf, dataLen);
+	int nSent = Send(pBuf, dataLen);
+
+	if (nSent == SOCKET_ERROR)
+	{
+		int nErr = GetLastError();
+
+		if (nErr == WSAEWOULDBLOCK)
+			return;
+		else
+		{
+			CString strMsg = "[Send Fail] nErr = " + nErr;
+			((CListBox*)GetDlgItem(IDC_LIST1))->AddString(strMsg);
+		}
+	}
 }
 
 
@@ -254,8 +268,22 @@ void CSimpleServerClientDlg::OnReceive(int nErrorCode)
 	int bytes = Receive(buf, sizeof(buf));
 
 	CString strRecvData = "";
-	strRecvData.Format("%s\r\n", buf);
+	strRecvData.Format("%d: %s\r\n", bytes, buf);
 	((CListBox*)GetDlgItem(IDC_LIST1))->AddString(strRecvData);
 
 	__super::OnReceive(nErrorCode);
+}
+
+
+void CSimpleServerClientDlg::OnSend(int nErrorCode)
+{
+	// TODO: ¿©±â¿¡ Æ¯¼öÈ­µÈ ÄÚµå¸¦ Ãß°¡ ¹×/¶Ç´Â ±âº» Å¬·¡½º¸¦ È£ÃâÇÕ´Ï´Ù.
+
+	__super::OnSend(nErrorCode);
+}
+
+
+void CSimpleServerClientDlg::OnBnClickedOk()
+{
+	// TODO: ¿©±â¿¡ ÄÁÆ®·Ñ ¾Ë¸² Ã³¸®±â ÄÚµå¸¦ Ãß°¡ÇÕ´Ï´Ù.
 }

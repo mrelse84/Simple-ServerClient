@@ -38,4 +38,6 @@ public:
 	virtual void OnConnect(int nErrorCode);
 	virtual void OnReceive(int nErrorCode);
 	CString m_strSendData;
+	virtual void OnSend(int nErrorCode);
+	afx_msg void OnBnClickedOk();
 };
